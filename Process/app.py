@@ -14,6 +14,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import json
 from flask_cors import CORS, cross_origin
 import os
+from os import path
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     print("In Test Environment")
@@ -40,6 +41,25 @@ logger.info("Log Conf File: %s" % log_conf_file)
 DB_ENGINE = create_engine("sqlite:///stats.sqlite")
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
+
+if not path.exists("stats.sqlite"):
+    import sqlite3 
+ 
+    conn = sqlite3.connect('stats.sqlite') 
+    
+    c = conn.cursor() 
+    c.execute(''' 
+            CREATE TABLE stats 
+            (id INTEGER PRIMARY KEY ASC,  
+            num_ticket_report INTEGER NOT NULL, 
+            num_sale_report INTEGER NOT NULL, 
+            min_sale_report INTEGER, 
+            max_sale_report INTEGER, 
+            last_updated VARCHAR(100) NOT NULL) 
+            ''') 
+    
+    conn.commit() 
+    conn.close()
 
 def get_stats(): 
     """ Gets new sale reports after the timestamp """ 

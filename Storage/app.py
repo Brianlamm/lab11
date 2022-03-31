@@ -14,6 +14,7 @@ import json
 from pykafka import KafkaClient  
 from pykafka.common import OffsetType  
 from threading import Thread 
+import time
 import os
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
@@ -133,16 +134,22 @@ def process_messages():
     """ Process event messages """ 
     hostname = "%s:%d" % (app_config["events"]["hostname"],   
                           app_config["events"]["port"]) 
-    client = KafkaClient(hosts=hostname) 
-    topic = client.topics[str.encode(app_config["events"]["topic"])] 
-     
-    # Create a consume on a consumer group, that only reads new messages  
-    # (uncommitted messages) when the service re-starts (i.e., it doesn't  
-    # read all the old messages from the history in the message queue). 
+
+    count = 0
+    while count < app_config["connection"]["max_count"]:
+        try:
+            client = KafkaClient(hosts=hostname) 
+            topic = client.topics[str.encode(app_config["events"]["topic"])] 
+            break
+            
+        except:
+            time.sleep(app_config["connection"]["wait"])
+            count += 1
+
+
     consumer = topic.get_simple_consumer(consumer_group=b'event_group', 
-                                         reset_offset_on_start=False, 
-                                         auto_offset_reset=OffsetType.LATEST) 
- 
+                                                reset_offset_on_start=False, 
+                                                auto_offset_reset=OffsetType.LATEST)
     # This is blocking - it will wait for a new message 
     for msg in consumer: 
         msg_str = msg.value.decode('utf-8') 
