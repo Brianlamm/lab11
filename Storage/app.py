@@ -114,7 +114,7 @@ def get_report_sale_info(start_timestamp, end_timestamp):
  
     start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%SZ") 
 
-    end_timestamp_datetime =  datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")    
+    end_timestamp_datetime =  datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%SZ")    
  
     reports = session.query(Sale).filter(Sale.date_created >= start_timestamp_datetime, Sale.date_created < end_timestamp_datetime) 
  
