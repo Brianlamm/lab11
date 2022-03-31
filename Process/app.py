@@ -38,14 +38,10 @@ logger = logging.getLogger('basicLogger')
 logger.info("App Conf File: %s" % app_conf_file)
 logger.info("Log Conf File: %s" % log_conf_file)
 
-DB_ENGINE = create_engine("sqlite:///stats.sqlite")
-Base.metadata.bind = DB_ENGINE
-DB_SESSION = sessionmaker(bind=DB_ENGINE)
-
-if not path.exists("stats.sqlite"):
+if not path.exists(app_config["datastore"]["filename"]):
     import sqlite3 
  
-    conn = sqlite3.connect('stats.sqlite') 
+    conn = sqlite3.connect(app_config["datastore"]["filename"]) 
     
     c = conn.cursor() 
     c.execute(''' 
@@ -60,6 +56,10 @@ if not path.exists("stats.sqlite"):
     
     conn.commit() 
     conn.close()
+
+DB_ENGINE = create_engine(f'sqlite:///{app_config["datastore"]["filename"]}')
+Base.metadata.bind = DB_ENGINE
+DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
 def get_stats(): 
     """ Gets new sale reports after the timestamp """ 
